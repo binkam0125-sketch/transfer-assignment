@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전학생 학급 배정 대장</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F1F3F1;
+    --paper: #FBFBF9;
+    --ink: #1E2A28;
+    --ink-soft: #5B6864;
+    --line: #D6DBD4;
+    --pine: #2F5D50;
+    --pine-deep: #1F4137;
+    --ochre: #B9781F;
+    --ochre-soft: #F3E4CB;
+    --mint: #E5EFEA;
+    --danger: #B0483F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 42px;
+    color:var(--ink);
+    font-family:'Pretendard', sans-serif;
+    line-height:1.5;
+    padding-bottom:80px;
+  }
+  header{
+    max-width:960px;
+    margin:0 auto;
+    padding:56px 24px 28px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--pine);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;background:var(--pine);
+  }
+  h1{
+    font-family:'Gowun Batang', serif;
+    font-size:clamp(30px,4.4vw,44px);
+    margin:10px 0 6px;
+    font-weight:700;
+    color:var(--pine-deep);
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:15px;
+    max-width:560px;
+  }
+  .rule-box{
+    max-width:960px;
+    margin:0 auto 36px;
+    padding:0 24px;
+  }
+  .rule-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-left:3px solid var(--pine);
+    padding:16px 20px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .rule-card b{color:var(--ink);}
+  main{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+  section{margin-bottom:44px;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+  }
+  .section-title{
+    font-family:'Gowun Batang', serif;
+    font-size:19px;
+    font-weight:700;
+  }
+  .section-note{
+    font-size:12px;
+    font-family:'JetBrains Mono', monospace;
+    color:var(--ink-soft);
+  }
+  .class-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:14px;
+  }
+  .class-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:18px;
+    position:relative;
+    transition:box-shadow .25s ease, transform .25s ease;
+  }
+  .class-card.flash{
+    box-shadow:0 0 0 2px var(--pine);
+    transform:translateY(-2px);
+  }
+  .class-card .badge{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--pine);
+    border:1px solid var(--pine);
+    padding:2px 8px;
+    display:inline-block;
+    margin-bottom:10px;
+  }
+  .class-card .name{
+    font-family:'Gowun Batang', serif;
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:12px;
+  }
+  .counts{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .counts .val{
+    font-family:'JetBrains Mono', monospace;
+    color:var(--ink);
+    font-weight:600;
+  }
+  .gauge{
+    height:8px;
+    background:var(--mint);
+    border:1px solid var(--line);
+    margin:10px 0 12px;
+    overflow:hidden;
+    display:flex;
+  }
+  .gauge .seg-regular{background:var(--pine); opacity:.85;}
+  .gauge .seg-special{background:var(--ochre);}
+  .total-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-top:1px dashed var(--line);
+    padding-top:10px;
+  }
+  .total-label{font-size:12px; color:var(--ink-soft);}
+  .total-num{
+    font-family:'JetBrains Mono', monospace;
+    font-size:24px;
+    font-weight:700;
+    color:var(--pine-deep);
+  }
+  .card-controls{
+    display:flex;
+    gap:6px;
+    margin-top:12px;
+  }
+  .card-controls button{
+    flex:1;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    background:transparent;
+    border:1px solid var(--line);
+    padding:6px 4px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .card-controls button:hover{border-color:var(--pine); color:var(--pine);}
+  .remove-class{
+    position:absolute;
+    top:14px; right:14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    background:none;
+    border:none;
+    cursor:pointer;
+  }
+  .remove-class:hover{color:var(--danger);}
+  .add-class{
+    border:1px dashed var(--line);
+    background:transparent;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:150px;
+    cursor:pointer;
+    font-size:13px;
+    font-family:'Pretendard', sans-serif;
+  }
+  .add-class:hover{border-color:var(--pine); color:var(--pine);}
+
+  .intake{
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:22px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:16px;
+    align-items:end;
+  }
+  .field-group{display:flex; gap:16px; flex-wrap:wrap;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{
+    font-size:11px;
+    font-family:'JetBrains Mono', monospace;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+  .toggle-group{display:flex; border:1px solid var(--line);}
+  .toggle-group button{
+    padding:9px 16px;
+    border:none;
+    background:var(--paper);
+    cursor:pointer;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    font-family:'Pretendard', sans-serif;
+  }
+  .toggle-group button.active{
+    background:var(--pine);
+    color:#fff;
+  }
+  .toggle-group button:first-child{border-right:1px solid var(--line);}
+  .assign-btn{
+    background:var(--pine-deep);
+    color:#fff;
+    border:none;
+    padding:12px 26px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    font-family:'Pretendard', sans-serif;
+  }
+  .assign-btn:hover{background:var(--pine);}
+  .assign-btn:disabled{background:var(--line); cursor:not-allowed;}
+
+  .result-banner{
+    display:none;
+    margin-top:14px;
+    padding:12px 16px;
+    background:var(--mint);
+    border-left:3px solid var(--pine);
+    font-size:13.5px;
+  }
+  .result-banner.show{display:block;}
+  .result-banner b{color:var(--pine-deep);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    background:var(--paper);
+  }
+  th,td{
+    border-bottom:1px solid var(--line);
+    padding:10px 12px;
+    text-align:left;
+  }
+  th{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    font-weight:600;
+  }
+  td.num, th.num{font-family:'JetBrains Mono', monospace; text-align:right;}
+  .empty-log{
+    padding:24px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    border:1px dashed var(--line);
+    background:var(--paper);
+  }
+  .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    padding:2px 7px;
+    border:1px solid var(--line);
+  }
+  .tag.special{color:var(--ochre); border-color:var(--ochre);}
+  .tag.regular{color:var(--pine); border-color:var(--pine);}
+  footer{
+    max-width:960px;
+    margin:60px auto 0;
+    padding:20px 24px 0;
+    border-top:1px solid var(--line);
+    font-size:11.5px;
+    color:var(--ink-soft);
+    font-family:'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Class Placement Ledger</div>
+  <h1>전학생 학급 배정 대장</h1>
+  <p class="sub">가중 인원이 가장 적은 학급부터, 동률이면 낮은 반 번호부터 순서대로 배정합니다.</p>
+</header>
+
+<div class="rule-box">
+  <div class="rule-card">
+    <span><b>산정 기준</b> — 일반학생 1명 = 1명 / 특수학급 학생 1명 = 2명</span>
+    <span><b>1순위</b> — 가중 합계 인원 최소 학급</span>
+    <span><b>2순위</b> — 동률 시 반 번호가 빠른 순</span>
+  </div>
+</div>
+
+<main>
+  <section>
+    <div class="section-head">
+      <div class="section-title">학급 현황</div>
+      <div class="section-note" id="classCount">0 CLASSES</div>
+    </div>
+    <div class="class-grid" id="classGrid"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="section-title">전학생 배정</div>
+      <div class="section-note">TRANSFER INTAKE</div>
+    </div>
+    <div class="intake">
+      <div class="field-group">
+        <div class="field">
+          <label>학생 구분</label>
+          <div class="toggle-group" id="typeToggle">
+            <button data-type="regular" class="active">일반학생</button>
+            <button data-type="special">특수학급 학생</button>
+          </div>
+        </div>
+      </div>
+      <button class="assign-btn" id="assignBtn">전학생 배정 실행</button>
+    </div>
+    <div class="result-banner" id="resultBanner"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="section-title">배정 이력</div>
+      <div class="section-note" id="logCount">0 RECORDS</div>
+    </div>
+    <div id="logWrap"></div>
+  </section>
+</main>
+
+<footer>
+  가중 합계 = 일반학생 수 × 1 + 특수학급 학생 수 × 2 · 데이터는 브라우저에만 저장되며 새로고침 시 초기화됩니다.
+</footer>
+
+<script>
+let classes = [
+  { no: 1, regular: 20, special: 1 },
+  { no: 2, regular: 22, special: 0 },
+  { no: 3, regular: 21, special: 0 },
+];
+let nextClassNo = 4;
+let log = [];
+let currentType = 'regular';
+
+function weightedTotal(c){ return c.regular * 1 + c.special * 2; }
+
+function render(){
+  renderClasses();
+  renderLog();
+  document.getElementById('assignBtn').disabled = classes.length === 0;
+}
+
+function renderClasses(){
+  const grid = document.getElementById('classGrid');
+  document.getElementById('classCount').textContent = classes.length + ' CLASSES';
+  grid.innerHTML = '';
+
+  const sorted = [...classes].sort((a,b)=>a.no-b.no);
+  const maxTotal = Math.max(1, ...classes.map(weightedTotal));
+
+  sorted.forEach(c => {
+    const total = weightedTotal(c);
+    const regPct = (c.regular / maxTotal) * 100;
+    const spPct = (c.special * 2 / maxTotal) * 100;
+
+    const card = document.createElement('div');
+    card.className = 'class-card';
+    card.id = 'card-' + c.no;
+    card.innerHTML = `
+      <button class="remove-class" onclick="removeClass(${c.no})">삭제 ×</button>
+      <div class="badge">CLASS-${String(c.no).padStart(2,'0')}</div>
+      <div class="name">${c.no}반</div>
+      <div class="counts"><span>일반학생</span><span class="val">${c.regular}명</span></div>
+      <div class="counts"><span>특수학급 학생</span><span class="val">${c.special}명 (×2)</span></div>
+      <div class="gauge">
+        <div class="seg-regular" style="width:${regPct}%"></div>
+        <div class="seg-special" style="width:${spPct}%"></div>
+      </div>
+      <div class="total-row">
+        <span class="total-label">가중 합계 인원</span>
+        <span class="total-num">${total}</span>
+      </div>
+      <div class="card-controls">
+        <button onclick="adjust(${c.no},'regular',-1)">일반 −</button>
+        <button onclick="adjust(${c.no},'regular',1)">일반 +</button>
+        <button onclick="adjust(${c.no},'special',-1)">특수 −</button>
+        <button onclick="adjust(${c.no},'special',1)">특수 +</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-class';
+  addBtn.textContent = '+ 학급 추가';
+  addBtn.onclick = addClass;
+  grid.appendChild(addBtn);
+}
+
+function renderLog(){
+  const wrap = document.getElementById('logWrap');
+  document.getElementById('logCount').textContent = log.length + ' RECORDS';
+  if(log.length === 0){
+    wrap.innerHTML = '<div class="empty-log">아직 배정 이력이 없습니다.</div>';
+    return;
+  }
+  let rows = log.slice().reverse().map(item => `
+    <tr>
+      <td class="num">${item.seq}</td>
+      <td><span class="tag ${item.type === 'special' ? 'special' : 'regular'}">${item.type === 'special' ? '특수학급' : '일반'}</span></td>
+      <td>${item.assignedTo}반</td>
+      <td>${item.reason}</td>
+      <td class="num">${item.totalAfter}</td>
+    </tr>
+  `).join('');
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr><th class="num">#</th><th>구분</th><th>배정 학급</th><th>사유</th><th class="num">배정 후 합계</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function adjust(no, field, delta){
+  const c = classes.find(c => c.no === no);
+  if(!c) return;
+  c[field] = Math.max(0, c[field] + delta);
+  render();
+}
+
+function addClass(){
+  classes.push({ no: nextClassNo, regular: 0, special: 0 });
+  nextClassNo++;
+  render();
+}
+
+function removeClass(no){
+  classes = classes.filter(c => c.no !== no);
+  render();
+}
+
+document.getElementById('typeToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  currentType = btn.dataset.type;
+  document.querySelectorAll('#typeToggle button').forEach(b => b.classList.toggle('active', b === btn));
+});
+
+document.getElementById('assignBtn').addEventListener('click', () => {
+  if(classes.length === 0) return;
+
+  const sorted = [...classes].sort((a,b) => {
+    const diff = weightedTotal(a) - weightedTotal(b);
+    return diff !== 0 ? diff : a.no - b.no;
+  });
+  const tiedTotal = weightedTotal(sorted[0]);
+  const tiedCount = sorted.filter(c => weightedTotal(c) === tiedTotal).length;
+  const target = sorted[0];
+
+  if(currentType === 'special'){ target.special += 1; } else { target.regular += 1; }
+
+  const reason = tiedCount > 1
+    ? `최소 인원 ${tiedCount}개 학급 동률 → 반 번호 최우선`
+    : `가중 합계 최소(${tiedTotal})`;
+
+  log.push({
+    seq: log.length + 1,
+    type: currentType,
+    assignedTo: target.no,
+    reason: reason,
+    totalAfter: weightedTotal(target)
+  });
+
+  render();
+
+  const banner = document.getElementById('resultBanner');
+  banner.innerHTML = `<b>${target.no}반</b>에 ${currentType === 'special' ? '특수학급' : '일반'} 전학생이 배정되었습니다. (${reason})`;
+  banner.classList.add('show');
+
+  const card = document.getElementById('card-' + target.no);
+  if(card){
+    card.classList.add('flash');
+    card.scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(() => card.classList.remove('flash'), 900);
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
