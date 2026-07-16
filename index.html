@@ -5,62 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>전학생 학급 배정 대장</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
-    --bg: #F1F3F1;
-    --paper: #FBFBF9;
-    --ink: #1E2A28;
-    --ink-soft: #5B6864;
-    --line: #D6DBD4;
-    --pine: #2F5D50;
-    --pine-deep: #1F4137;
-    --ochre: #B9781F;
-    --ochre-soft: #F3E4CB;
-    --mint: #E5EFEA;
-    --danger: #B0483F;
+    --bg: #101830;
+    --paper: #FFFFFF;
+    --paper-soft: #E7E8EC;
+    --ink: #1B2432;
+    --ink-soft: #667081;
+    --line: #E1E4EA;
+    --text-strong: #F5F7FC;
+    --text-muted: #93A0C2;
+    --accent: #C1584E;
+    --accent-deep: #832A22;
+    --nav-accent: #F0B429;
+    --nav-accent-deep: #8A5F00;
+    --navy: #2C4A7C;
+    --ochre: #6B63A6;
+    --ochre-soft: #E6E3F4;
+    --mint: #FDF3D9;
+    --danger: #C0473C;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     background:var(--bg);
-    background-image:
-      linear-gradient(var(--line) 1px, transparent 1px);
-    background-size: 100% 42px;
     color:var(--ink);
-    font-family:'Pretendard', sans-serif;
+    font-family:'Noto Sans KR', sans-serif;
     line-height:1.5;
     padding-bottom:80px;
   }
   header{
     max-width:960px;
     margin:0 auto;
-    padding:56px 24px 28px;
+    padding:40px 24px 28px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
   }
   .eyebrow{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;
-    letter-spacing:.14em;
-    color:var(--pine);
-    text-transform:uppercase;
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .eyebrow::before{
-    content:"";
-    width:22px;height:1px;background:var(--pine);
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.02em;
+    color:var(--text-muted);
   }
   h1{
-    font-family:'Gowun Batang', serif;
+    font-family:'Noto Sans KR', sans-serif;
     font-size:clamp(30px,4.4vw,44px);
-    margin:10px 0 6px;
+    margin:2px 0 6px;
     font-weight:700;
-    color:var(--pine-deep);
+    color:var(--text-strong);
     letter-spacing:-0.01em;
   }
   .sub{
-    color:var(--ink-soft);
+    color:var(--text-muted);
     font-size:15px;
     max-width:560px;
   }
@@ -72,21 +74,105 @@
   .rule-card{
     background:var(--paper);
     border:1px solid var(--line);
-    border-left:3px solid var(--pine);
-    padding:16px 20px;
+    border-left:3px solid var(--navy);
+    border-radius:0 10px 10px 0;
+    padding:18px 22px;
     font-size:13.5px;
     color:var(--ink-soft);
     display:flex;
-    gap:24px;
+    flex-direction:column;
+    gap:12px;
+  }
+  .rule-row{
+    display:flex;
+    gap:28px;
     flex-wrap:wrap;
   }
   .rule-card b{color:var(--ink);}
+  .tab-bar{
+    max-width:960px;
+    margin:0 auto 28px;
+    padding:0 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    border-bottom:2px solid var(--line);
+    padding-bottom:14px;
+  }
+  .tab-group{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .tab-group::-webkit-scrollbar{
+    display:none;
+  }
+  .tab-btn{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13.5px;
+    font-weight:700;
+    padding:10px 20px;
+    background:var(--nav-accent);
+    border:2px solid #000;
+    border-radius:8px;
+    color:#000;
+    cursor:pointer;
+    white-space:nowrap;
+    box-shadow:0 2px 4px rgba(0,0,0,.15);
+  }
+  .tab-btn:hover{ filter:brightness(1.05); }
+  .tab-btn.active{
+    background:var(--paper);
+    border:2px solid var(--nav-accent);
+    color:#000;
+    font-weight:700;
+  }
+  .tab-btn.overview-tab{
+    background:#E5E7EB;
+    border-color:#000;
+    color:#6B7280;
+  }
+  .tab-btn.overview-tab.active{
+    background:#E5E7EB;
+    border-color:#6B7280;
+    color:#6B7280;
+  }
+  .upload-tab-btn{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:9px 18px;
+    border:none;
+    border-radius:999px;
+    background:#3B82F6;
+    color:#fff;
+    cursor:pointer;
+    white-space:nowrap;
+    box-shadow:0 1px 2px rgba(23,32,46,.15);
+  }
+  .upload-tab-btn:hover{
+    filter:brightness(1.08);
+  }
+  .upload-tab-btn.active{
+    background:#2563EB;
+    color:#fff;
+  }
+
   main{
     max-width:960px;
     margin:0 auto;
     padding:0 24px;
   }
-  section{margin-bottom:44px;}
+  section{
+    margin-bottom:28px;
+    background:var(--paper-soft);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px 24px;
+  }
   .section-head{
     display:flex;
     align-items:baseline;
@@ -96,7 +182,7 @@
     padding-bottom:8px;
   }
   .section-title{
-    font-family:'Gowun Batang', serif;
+    font-family:'Noto Sans KR', sans-serif;
     font-size:19px;
     font-weight:700;
   }
@@ -110,28 +196,69 @@
     grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
     gap:14px;
   }
+  .priority-hint{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+  }
+  .priority-order{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:22px;
+  }
+  .priority-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .priority-num{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .priority-item.next .priority-num{
+    color:var(--navy);
+    font-weight:700;
+  }
+  .priority-box{
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:14px 26px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:15px;
+    white-space:nowrap;
+    box-shadow:0 2px 6px rgba(16,24,48,.06);
+  }
+  .priority-item.next .priority-box{
+    background:var(--navy);
+    border-color:var(--navy);
+    color:#fff;
+  }
+  .priority-arrow{
+    align-self:center;
+    margin-top:16px;
+    color:var(--ink-soft);
+    font-size:18px;
+  }
   .class-card{
     background:var(--paper);
     border:1px solid var(--line);
+    border-radius:10px;
     padding:18px;
     position:relative;
     transition:box-shadow .25s ease, transform .25s ease;
   }
   .class-card.flash{
-    box-shadow:0 0 0 2px var(--pine);
+    box-shadow:0 0 0 2px var(--accent);
     transform:translateY(-2px);
   }
-  .class-card .badge{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--pine);
-    border:1px solid var(--pine);
-    padding:2px 8px;
-    display:inline-block;
-    margin-bottom:10px;
-  }
   .class-card .name{
-    font-family:'Gowun Batang', serif;
+    font-family:'Noto Sans KR', sans-serif;
     font-size:20px;
     font-weight:700;
     margin-bottom:12px;
@@ -148,16 +275,6 @@
     color:var(--ink);
     font-weight:600;
   }
-  .gauge{
-    height:8px;
-    background:var(--mint);
-    border:1px solid var(--line);
-    margin:10px 0 12px;
-    overflow:hidden;
-    display:flex;
-  }
-  .gauge .seg-regular{background:var(--pine); opacity:.85;}
-  .gauge .seg-special{background:var(--ochre);}
   .total-row{
     display:flex;
     align-items:baseline;
@@ -170,7 +287,7 @@
     font-family:'JetBrains Mono', monospace;
     font-size:24px;
     font-weight:700;
-    color:var(--pine-deep);
+    color:var(--navy);
   }
   .card-controls{
     display:flex;
@@ -187,12 +304,13 @@
     cursor:pointer;
     color:var(--ink-soft);
   }
-  .card-controls button:hover{border-color:var(--pine); color:var(--pine);}
+  .card-controls button:hover{border:2px solid var(--navy); color:var(--navy); font-weight:700;}
   .remove-class{
     position:absolute;
     top:14px; right:14px;
     font-family:'JetBrains Mono', monospace;
-    font-size:11px;
+    font-size:16px;
+    line-height:1;
     color:var(--ink-soft);
     background:none;
     border:none;
@@ -201,6 +319,7 @@
   .remove-class:hover{color:var(--danger);}
   .add-class{
     border:1px dashed var(--line);
+    border-radius:10px;
     background:transparent;
     color:var(--ink-soft);
     display:flex;
@@ -209,18 +328,19 @@
     min-height:150px;
     cursor:pointer;
     font-size:13px;
-    font-family:'Pretendard', sans-serif;
+    font-family:'Noto Sans KR', sans-serif;
   }
-  .add-class:hover{border-color:var(--pine); color:var(--pine);}
+  .add-class:hover{border-color:var(--navy); color:var(--navy);}
 
   .intake{
     background:var(--paper);
     border:1px solid var(--line);
+    border-radius:10px;
     padding:22px;
-    display:grid;
-    grid-template-columns:1fr auto;
-    gap:16px;
-    align-items:end;
+    display:flex;
+    align-items:center;
+    gap:24px;
+    flex-wrap:wrap;
   }
   .field-group{display:flex; gap:16px; flex-wrap:wrap;}
   .field{display:flex; flex-direction:column; gap:6px;}
@@ -231,23 +351,27 @@
     text-transform:uppercase;
     letter-spacing:.06em;
   }
-  .toggle-group{display:flex; border:1px solid var(--line);}
+  .toggle-group{display:flex; gap:10px; border:none; width:260px;}
   .toggle-group button{
+    flex:1;
     padding:9px 16px;
-    border:none;
+    border:1px solid var(--line);
+    border-radius:8px;
     background:var(--paper);
     cursor:pointer;
     font-size:13.5px;
     color:var(--ink-soft);
-    font-family:'Pretendard', sans-serif;
+    text-align:center;
+    font-family:'Noto Sans KR', sans-serif;
   }
   .toggle-group button.active{
-    background:var(--pine);
-    color:#fff;
+    background:var(--paper);
+    border:2px solid var(--navy);
+    color:var(--navy);
+    font-weight:700;
   }
-  .toggle-group button:first-child{border-right:1px solid var(--line);}
   .assign-btn{
-    background:var(--pine-deep);
+    background:var(--accent);
     color:#fff;
     border:none;
     padding:12px 26px;
@@ -255,27 +379,30 @@
     font-weight:600;
     cursor:pointer;
     white-space:nowrap;
-    font-family:'Pretendard', sans-serif;
+    font-family:'Noto Sans KR', sans-serif;
   }
-  .assign-btn:hover{background:var(--pine);}
-  .assign-btn:disabled{background:var(--line); cursor:not-allowed;}
+  .assign-btn:hover{filter:brightness(1.08);}
+  .assign-btn:disabled{background:var(--line); color:var(--ink-soft); cursor:not-allowed; filter:none;}
 
   .result-banner{
     display:none;
     margin-top:14px;
     padding:12px 16px;
     background:var(--mint);
-    border-left:3px solid var(--pine);
+    border-left:3px solid var(--accent-deep);
+    border-radius:0 8px 8px 0;
     font-size:13.5px;
   }
   .result-banner.show{display:block;}
-  .result-banner b{color:var(--pine-deep);}
+  .result-banner b{color:var(--accent-deep);}
 
   table{
     width:100%;
     border-collapse:collapse;
     font-size:13px;
     background:var(--paper);
+    border-radius:10px;
+    overflow:hidden;
   }
   th,td{
     border-bottom:1px solid var(--line);
@@ -297,6 +424,7 @@
     color:var(--ink-soft);
     font-size:13px;
     border:1px dashed var(--line);
+    border-radius:10px;
     background:var(--paper);
   }
   .tag{
@@ -306,14 +434,109 @@
     border:1px solid var(--line);
   }
   .tag.special{color:var(--ochre); border-color:var(--ochre);}
-  .tag.regular{color:var(--pine); border-color:var(--pine);}
+  .log-delete-btn{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:11.5px;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:4px 10px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .log-delete-btn:hover{
+    border-color:var(--danger);
+    color:var(--danger);
+  }
+  .tag.regular{color:var(--navy); border-color:var(--navy);}
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:14px;
+    padding:18px 22px;
+    background:var(--paper-soft);
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:26px;
+  }
+  .toolbar-left{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .toolbar-title{
+    font-family:'Noto Sans KR', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .toolbar-sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .toolbar-right{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .pill-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .pill-btn{
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    padding:11px 20px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .pill-btn.pill-sm{
+    padding:8px 16px;
+    font-size:12.5px;
+  }
+  .pill-outline{
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--ink);
+  }
+  .pill-outline:hover{
+    border-color:var(--nav-accent-deep);
+    color:var(--nav-accent-deep);
+  }
+  #downloadTemplateBtn{
+    border-color:var(--nav-accent-deep);
+    color:var(--nav-accent-deep);
+  }
+  .pill-notes{
+    margin:0;
+    padding-left:18px;
+    color:var(--ink-soft);
+    font-size:12.5px;
+    line-height:1.9;
+  }
+  .pill-notes b{color:var(--ink);}
+  @media (max-width: 640px){
+    .toolbar{flex-direction:column; align-items:flex-start;}
+    .toolbar-right{width:100%;}
+    .toolbar-right .pill-btn{flex:1; text-align:center;}
+    .pill-row{flex-direction:column;}
+    .pill-btn{width:100%; text-align:center;}
+  }
+
   footer{
     max-width:960px;
     margin:60px auto 0;
     padding:20px 24px 0;
     border-top:1px solid var(--line);
     font-size:11.5px;
-    color:var(--ink-soft);
+    color:var(--text-muted);
     font-family:'JetBrains Mono', monospace;
   }
 </style>
@@ -321,23 +544,66 @@
 <body>
 
 <header>
-  <div class="eyebrow">Class Placement Ledger</div>
-  <h1>전학생 학급 배정 대장</h1>
-  <p class="sub">가중 인원이 가장 적은 학급부터, 동률이면 낮은 반 번호부터 순서대로 배정합니다.</p>
+  <div class="header-text">
+    <div class="eyebrow">참미르초등학교</div>
+    <h1>전학생 학급 배정 대장</h1>
+  </div>
 </header>
 
 <div class="rule-box">
   <div class="rule-card">
-    <span><b>산정 기준</b> — 일반학생 1명 = 1명 / 특수학급 학생 1명 = 2명</span>
-    <span><b>1순위</b> — 가중 합계 인원 최소 학급</span>
-    <span><b>2순위</b> — 동률 시 반 번호가 빠른 순</span>
+    <div class="rule-row">
+      <span><b>산정 기준</b> — 일반학생 1명 = 1명 / 특수교육대상자 1명 = 2명</span>
+    </div>
+    <div class="rule-row">
+      <span><b>1순위</b> — 배정 기준 인원 최소 학급</span>
+      <span><b>2순위</b> — 동률 시 반 번호가 빠른 순</span>
+    </div>
   </div>
 </div>
 
+<div class="tab-bar" id="tabBar">
+  <div class="tab-group">
+    <button class="tab-btn overview-tab" data-tab="overview">총괄</button>
+    <button class="tab-btn active" data-tab="1">1학년</button>
+    <button class="tab-btn" data-tab="2">2학년</button>
+    <button class="tab-btn" data-tab="3">3학년</button>
+    <button class="tab-btn" data-tab="4">4학년</button>
+    <button class="tab-btn" data-tab="5">5학년</button>
+    <button class="tab-btn" data-tab="6">6학년</button>
+  </div>
+  <button class="upload-tab-btn" data-tab="upload" id="uploadTopBtn">⇪ 명렬표 업로드</button>
+</div>
+
 <main>
+  <div id="uploadPanel" style="display:none;">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <span class="toolbar-title">명렬표 업로드</span>
+      <span class="toolbar-sub">전체명렬표 · 특수학급명단 2개 시트 서식 제공</span>
+    </div>
+    <div class="toolbar-right">
+      <button class="pill-btn pill-outline pill-sm" id="downloadTemplateBtn">서식 다운로드</button>
+      <button class="pill-btn pill-outline pill-sm" id="uploadResetBtn">엑셀 업로드 (초기화)</button>
+      <button class="pill-btn pill-outline pill-sm" id="uploadAppendBtn">엑셀 업로드 (추가)</button>
+      <input type="file" id="hiddenFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+    </div>
+  </div>
+  <section>
+    <ul class="pill-notes">
+      <li><b>초기화 후 반영</b> — 업로드한 학년 탭의 현황을 지우고 업로드한 내용으로 새로 채웁니다.</li>
+      <li><b>추가 반영</b> — 각 학년 탭의 기존 현황은 그대로 두고, 업로드한 인원만큼 더합니다.</li>
+      <li>서식에는 시트가 2개입니다 — <b>전체명렬표</b>(학년·반·번호·성별·비고), <b>특수학급명단</b>(학년·반·번호). 특수학급명단에 있는 학생은 전체명렬표와 학년·반·번호가 일치하면 자동으로 가중치(×2)가 적용됩니다.</li>
+      <li>한 파일에 1~6학년 데이터를 모두 넣어도 됩니다. 학년 열을 기준으로 자동 분류되어 각 학년 탭에 나눠 반영됩니다. (1~6학년 범위를 벗어난 값은 건너뜁니다)</li>
+    </ul>
+    <div class="result-banner" id="importBanner"></div>
+  </section>
+  </div>
+
+  <div id="gradePanel">
   <section>
     <div class="section-head">
-      <div class="section-title">학급 현황</div>
+      <div class="section-title" id="gradePanelTitle">1. 학급 현황</div>
       <div class="section-note" id="classCount">0 CLASSES</div>
     </div>
     <div class="class-grid" id="classGrid"></div>
@@ -345,16 +611,22 @@
 
   <section>
     <div class="section-head">
-      <div class="section-title">전학생 배정</div>
-      <div class="section-note">TRANSFER INTAKE</div>
+      <div class="section-title" id="priorityTitle">2. 배정 순서</div>
+    </div>
+    <p class="priority-hint">지금 전학생이 오면 이 순서대로 배정됩니다. (배정 기준 인원이 적은 반부터, 동률이면 반 번호가 빠른 순)</p>
+    <div class="priority-order" id="priorityOrder"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div class="section-title" id="intakeTitle">3. 전학생 배정</div>
     </div>
     <div class="intake">
       <div class="field-group">
         <div class="field">
-          <label>학생 구분</label>
-          <div class="toggle-group" id="typeToggle">
+                    <div class="toggle-group" id="typeToggle">
             <button data-type="regular" class="active">일반학생</button>
-            <button data-type="special">특수학급 학생</button>
+            <button data-type="special">특수교육대상자</button>
           </div>
         </div>
       </div>
@@ -365,63 +637,126 @@
 
   <section>
     <div class="section-head">
-      <div class="section-title">배정 이력</div>
+      <div class="section-title" id="logSectionTitle">4. 배정 이력</div>
       <div class="section-note" id="logCount">0 RECORDS</div>
     </div>
     <div id="logWrap"></div>
   </section>
+  </div>
+
+  <div id="overviewPanel" style="display:none;">
+  <section>
+    <div class="section-head">
+      <div class="section-title">전체 학년 총괄 현황</div>
+    </div>
+    <div id="overviewWrap"></div>
+  </section>
+  </div>
 </main>
 
 <footer>
-  가중 합계 = 일반학생 수 × 1 + 특수학급 학생 수 × 2 · 데이터는 브라우저에만 저장되며 새로고침 시 초기화됩니다.
+  배정 기준 인원 = 일반학생 수 × 1 + 특수교육대상자 수 × 2 · 데이터는 브라우저에만 저장되며 새로고침 시 초기화됩니다.
 </footer>
 
 <script>
-let classes = [
+const GRADES = [1,2,3,4,5,6];
+const state = {};
+GRADES.forEach(g => { state[g] = { classes: [], log: [] }; });
+// 데모용 예시 데이터 (1학년만)
+state[1].classes = [
   { no: 1, regular: 20, special: 1 },
   { no: 2, regular: 22, special: 0 },
   { no: 3, regular: 21, special: 0 },
 ];
-let nextClassNo = 4;
-let log = [];
+
+let activeGrade = 1;
 let currentType = 'regular';
 
 function weightedTotal(c){ return c.regular * 1 + c.special * 2; }
 
+// ===== 탭 전환 =====
+function activateTab(tab){
+  document.querySelectorAll('.tab-btn, .upload-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === String(tab));
+  });
+
+  document.getElementById('uploadPanel').style.display = tab === 'upload' ? '' : 'none';
+  document.getElementById('gradePanel').style.display = (tab !== 'upload' && tab !== 'overview') ? '' : 'none';
+  document.getElementById('overviewPanel').style.display = tab === 'overview' ? '' : 'none';
+
+  if(tab === 'overview'){
+    renderOverview();
+  } else if(tab !== 'upload'){
+    activeGrade = Number(tab);
+    document.getElementById('gradePanelTitle').textContent = '1. 학급 현황';
+    document.getElementById('priorityTitle').textContent = '2. 배정 순서';
+    document.getElementById('intakeTitle').textContent = '3. 전학생 배정';
+    document.getElementById('logSectionTitle').textContent = '4. 배정 이력';
+    document.getElementById('resultBanner').classList.remove('show');
+    render();
+  }
+}
+
+document.getElementById('tabBar').addEventListener('click', (e) => {
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  activateTab(btn.dataset.tab);
+});
+
+document.getElementById('uploadTopBtn').addEventListener('click', () => {
+  activateTab('upload');
+});
+
 function render(){
   renderClasses();
+  renderPriorityOrder();
   renderLog();
-  document.getElementById('assignBtn').disabled = classes.length === 0;
+  document.getElementById('assignBtn').disabled = state[activeGrade].classes.length === 0;
+}
+
+function renderPriorityOrder(){
+  const classes = state[activeGrade].classes;
+  const wrap = document.getElementById('priorityOrder');
+  if(classes.length === 0){
+    wrap.innerHTML = '<span style="color:var(--ink-soft); font-size:13px;">등록된 학급이 없습니다.</span>';
+    return;
+  }
+  const sorted = [...classes].sort((a,b) => {
+    const diff = weightedTotal(a) - weightedTotal(b);
+    return diff !== 0 ? diff : a.no - b.no;
+  });
+  wrap.innerHTML = sorted.map((c, i) => {
+    const item = `
+    <div class="priority-item${i === 0 ? ' next' : ''}">
+      <span class="priority-num">${i + 1}순위</span>
+      <span class="priority-box">${c.no}반 (${weightedTotal(c)}명)</span>
+    </div>`;
+    const arrow = i < sorted.length - 1 ? '<span class="priority-arrow">›</span>' : '';
+    return item + arrow;
+  }).join('');
 }
 
 function renderClasses(){
+  const classes = state[activeGrade].classes;
   const grid = document.getElementById('classGrid');
   document.getElementById('classCount').textContent = classes.length + ' CLASSES';
   grid.innerHTML = '';
 
   const sorted = [...classes].sort((a,b)=>a.no-b.no);
-  const maxTotal = Math.max(1, ...classes.map(weightedTotal));
 
   sorted.forEach(c => {
     const total = weightedTotal(c);
-    const regPct = (c.regular / maxTotal) * 100;
-    const spPct = (c.special * 2 / maxTotal) * 100;
 
     const card = document.createElement('div');
     card.className = 'class-card';
     card.id = 'card-' + c.no;
     card.innerHTML = `
-      <button class="remove-class" onclick="removeClass(${c.no})">삭제 ×</button>
-      <div class="badge">CLASS-${String(c.no).padStart(2,'0')}</div>
+      <button class="remove-class" onclick="removeClass(${c.no})" title="학급 삭제">×</button>
       <div class="name">${c.no}반</div>
       <div class="counts"><span>일반학생</span><span class="val">${c.regular}명</span></div>
-      <div class="counts"><span>특수학급 학생</span><span class="val">${c.special}명 (×2)</span></div>
-      <div class="gauge">
-        <div class="seg-regular" style="width:${regPct}%"></div>
-        <div class="seg-special" style="width:${spPct}%"></div>
-      </div>
+      <div class="counts"><span>특수교육대상자</span><span class="val">${c.special}명 (×2)</span></div>
       <div class="total-row">
-        <span class="total-label">가중 합계 인원</span>
+        <span class="total-label">배정 기준 인원</span>
         <span class="total-num">${total}</span>
       </div>
       <div class="card-controls">
@@ -442,6 +777,7 @@ function renderClasses(){
 }
 
 function renderLog(){
+  const log = state[activeGrade].log;
   const wrap = document.getElementById('logWrap');
   document.getElementById('logCount').textContent = log.length + ' RECORDS';
   if(log.length === 0){
@@ -455,33 +791,309 @@ function renderLog(){
       <td>${item.assignedTo}반</td>
       <td>${item.reason}</td>
       <td class="num">${item.totalAfter}</td>
+      <td class="num"><button class="log-delete-btn" onclick="deleteLogEntry('${item.id}')" title="이 배정을 취소하고 인원을 되돌립니다">취소</button></td>
     </tr>
   `).join('');
   wrap.innerHTML = `
     <table>
       <thead>
-        <tr><th class="num">#</th><th>구분</th><th>배정 학급</th><th>사유</th><th class="num">배정 후 합계</th></tr>
+        <tr><th class="num">#</th><th>구분</th><th>배정 학급</th><th>사유</th><th class="num">배정 후 합계</th><th class="num">되돌리기</th></tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
   `;
 }
 
+function deleteLogEntry(id){
+  const list = state[activeGrade].log;
+  const idx = list.findIndex(item => item.id === id);
+  if(idx === -1) return;
+  const item = list[idx];
+
+  if(!confirm(`${activeGrade}학년 ${item.assignedTo}반에 ${item.type === 'special' ? '특수학급' : '일반'} 전학생으로 배정된 기록을 취소할까요? 해당 반의 인원도 1명 줄어듭니다.`)){
+    return;
+  }
+
+  const c = state[activeGrade].classes.find(c => c.no === item.assignedTo);
+  if(c){
+    const field = item.type === 'special' ? 'special' : 'regular';
+    c[field] = Math.max(0, c[field] - 1);
+  }
+
+  list.splice(idx, 1);
+  list.forEach((entry, i) => { entry.seq = i + 1; });
+
+  render();
+}
+
+function renderOverview(){
+  const wrap = document.getElementById('overviewWrap');
+
+  const gradeRows = GRADES.map(g => {
+    const classes = [...state[g].classes].sort((a,b) => a.no - b.no);
+    const regularTotal = classes.reduce((s,c) => s + c.regular, 0);
+    const specialTotal = classes.reduce((s,c) => s + c.special, 0);
+    return {
+      grade: g,
+      classes,
+      classCount: classes.length,
+      studentTotal: regularTotal + specialTotal,
+      regularTotal,
+      specialTotal,
+      weightedSum: classes.reduce((s,c) => s + weightedTotal(c), 0)
+    };
+  });
+
+  if(gradeRows.every(r => r.classCount === 0)){
+    wrap.innerHTML = '<div class="empty-log">등록된 학급이 아직 없습니다. 학년 탭이나 명렬표 업로드에서 먼저 학급을 등록해주세요.</div>';
+    return;
+  }
+
+  const bodyRows = gradeRows.map(r => {
+    if(r.classCount === 0){
+      return `
+        <tr>
+          <td>${r.grade}학년</td>
+          <td colspan="4" style="color:var(--ink-soft);">등록된 학급이 없습니다.</td>
+        </tr>`;
+    }
+    const classRows = r.classes.map(c => `
+      <tr>
+        <td>${r.grade}학년</td>
+        <td>${c.no}반</td>
+        <td class="num">${c.regular}</td>
+        <td class="num">${c.special}</td>
+        <td class="num">${weightedTotal(c)}</td>
+      </tr>
+    `).join('');
+    const subtotalRow = `
+      <tr style="background:var(--paper-soft); font-weight:700;">
+        <td>${r.grade}학년 소계</td>
+        <td class="num">${r.classCount}개 반</td>
+        <td class="num">${r.regularTotal}</td>
+        <td class="num">${r.specialTotal}</td>
+        <td class="num">${r.weightedSum}</td>
+      </tr>`;
+    return classRows + subtotalRow;
+  }).join('');
+
+  const grand = gradeRows.reduce((acc, r) => ({
+    classCount: acc.classCount + r.classCount,
+    studentTotal: acc.studentTotal + r.studentTotal,
+    regularTotal: acc.regularTotal + r.regularTotal,
+    specialTotal: acc.specialTotal + r.specialTotal,
+    weightedSum: acc.weightedSum + r.weightedSum
+  }), { classCount:0, studentTotal:0, regularTotal:0, specialTotal:0, weightedSum:0 });
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>학년</th>
+          <th>반</th>
+          <th class="num">일반학생</th>
+          <th class="num">특수교육대상자</th>
+          <th class="num">배정 기준 인원</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bodyRows}
+        <tr style="font-weight:700; border-top:2px solid var(--line);">
+          <td>전체 합계</td>
+          <td class="num">${grand.classCount}개 반</td>
+          <td class="num">${grand.regularTotal}</td>
+          <td class="num">${grand.specialTotal}</td>
+          <td class="num">${grand.weightedSum}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+// ===== 서식 다운로드 =====
+document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+  const wb = XLSX.utils.book_new();
+
+  const rosterSheet = XLSX.utils.aoa_to_sheet([
+    ['학년', '반', '번호', '성별', '비고'],
+    [1, 1, 1, '여성', ''],
+    [1, 1, 2, '남성', ''],
+    [1, 1, 3, '여성', ''],
+  ]);
+  XLSX.utils.book_append_sheet(wb, rosterSheet, '전체명렬표');
+
+  const specialSheet = XLSX.utils.aoa_to_sheet([
+    ['학년', '반', '번호', '비고'],
+    [1, 1, 2, '예시 - 전체명렬표의 1학년 1반 2번과 같은 학생'],
+  ]);
+  XLSX.utils.book_append_sheet(wb, specialSheet, '특수학급명단');
+
+  XLSX.writeFile(wb, '전학생배정_명렬표_서식.xlsx');
+});
+
+// ===== 명렬표 업로드 (초기화 후 반영 / 추가 반영) =====
+let importMode = 'reset';
+
+document.getElementById('uploadResetBtn').addEventListener('click', () => {
+  importMode = 'reset';
+  document.getElementById('hiddenFileInput').click();
+});
+document.getElementById('uploadAppendBtn').addEventListener('click', () => {
+  importMode = 'append';
+  document.getElementById('hiddenFileInput').click();
+});
+
+document.getElementById('hiddenFileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(file) processWorkbook(file, importMode);
+  e.target.value = '';
+});
+
+function guessColumn(headers, keyword){
+  const idx = headers.findIndex(h => String(h).includes(keyword));
+  return idx >= 0 ? idx : -1;
+}
+
+function findSheetName(wb, keyword, fallbackIndex){
+  const found = wb.SheetNames.find(n => n.includes(keyword));
+  return found || wb.SheetNames[fallbackIndex] || null;
+}
+
+function sheetToRows(wb, sheetName){
+  if(!sheetName) return null;
+  const sheet = wb.Sheets[sheetName];
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  if(rows.length < 2) return null;
+  const headers = rows[0].map(h => String(h).trim());
+  const dataRows = rows.slice(1).filter(r => r.some(v => String(v).trim() !== ''));
+  return { headers, rows: dataRows };
+}
+
+function processWorkbook(file, mode){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let wb;
+    try{
+      wb = XLSX.read(e.target.result, { type: 'array' });
+    }catch(err){
+      alert('파일을 읽지 못했습니다. 다운로드한 서식(xlsx)에 맞춰 작성했는지 확인해주세요.');
+      return;
+    }
+
+    const rosterSheetName = findSheetName(wb, '전체', 0);
+    const specialSheetName = findSheetName(wb, '특수', wb.SheetNames.length > 1 ? 1 : -1);
+    const roster = sheetToRows(wb, rosterSheetName);
+    const special = specialSheetName ? sheetToRows(wb, specialSheetName) : null;
+
+    if(!roster){
+      alert('전체명렬표 시트에서 데이터를 찾지 못했습니다. 첫 줄은 학년/반/번호 등 열 제목, 그 아래는 학생 데이터여야 합니다.');
+      return;
+    }
+
+    const gradeColIdx = guessColumn(roster.headers, '학년');
+    const classColIdx = guessColumn(roster.headers, '반');
+    const noColIdx = guessColumn(roster.headers, '번호');
+    if(classColIdx === -1 || noColIdx === -1){
+      alert('전체명렬표에서 "반", "번호" 열을 찾지 못했습니다. 서식의 열 이름을 그대로 사용해주세요.');
+      return;
+    }
+
+    // 특수학급명단 → "학년|반|번호" (학년 열이 없으면 "_|반|번호") 키 집합
+    const specialKeys = new Set();
+    if(special){
+      const sClassIdx = guessColumn(special.headers, '반');
+      const sNoIdx = guessColumn(special.headers, '번호');
+      const sGradeIdx = guessColumn(special.headers, '학년');
+      if(sClassIdx !== -1 && sNoIdx !== -1){
+        special.rows.forEach(r => {
+          const cv = String(r[sClassIdx]).trim();
+          const nv = String(r[sNoIdx]).trim();
+          if(sGradeIdx !== -1){
+            specialKeys.add(`${String(r[sGradeIdx]).trim()}|${cv}|${nv}`);
+          } else {
+            specialKeys.add(`_|${cv}|${nv}`);
+          }
+        });
+      }
+    }
+
+    // 학년 + 반 기준으로 집계
+    const grouped = {}; // key: "학년|반" -> {grade, no, regular, special}
+    let matchedCount = 0;
+    const skippedGrades = new Set();
+    roster.rows.forEach(r => {
+      const gradeVal = gradeColIdx !== -1 ? String(r[gradeColIdx]).trim() : '1';
+      const classVal = String(r[classColIdx]).trim();
+      const noVal = String(r[noColIdx]).trim();
+      if(gradeVal === '' || classVal === '') return;
+      const gradeNum = Number(gradeVal);
+      if(!GRADES.includes(gradeNum)){ skippedGrades.add(gradeVal); return; }
+
+      const key = gradeVal + '|' + classVal;
+      if(!grouped[key]) grouped[key] = { grade: gradeNum, no: Number(classVal) || classVal, regular: 0, special: 0 };
+
+      const isSpecial = specialKeys.has(`${gradeVal}|${classVal}|${noVal}`) || specialKeys.has(`_|${classVal}|${noVal}`);
+      if(isSpecial){ grouped[key].special++; } else { grouped[key].regular++; }
+      matchedCount++;
+    });
+
+    const groupList = Object.values(grouped);
+    if(groupList.length === 0){
+      alert('불러올 학급 데이터를 찾지 못했습니다. 서식의 열 이름을 그대로 사용했는지, 학년 값이 1~6인지 확인해주세요.');
+      return;
+    }
+
+    // 학년별로 나누어 state에 반영
+    const importedGrades = [...new Set(groupList.map(g => g.grade))].sort((a,b)=>a-b);
+    importedGrades.forEach(g => {
+      const items = groupList.filter(x => x.grade === g).sort((a,b)=>a.no-b.no);
+      if(mode === 'reset'){
+        state[g].classes = items.map(it => ({ no: it.no, regular: it.regular, special: it.special }));
+        state[g].log = [];
+      } else {
+        items.forEach(it => {
+          let c = state[g].classes.find(c => c.no === it.no);
+          if(!c){
+            c = { no: it.no, regular: 0, special: 0 };
+            state[g].classes.push(c);
+          }
+          c.regular += it.regular;
+          c.special += it.special;
+        });
+      }
+    });
+
+    render();
+
+    const totalSpecial = groupList.reduce((s,g) => s + g.special, 0);
+    const modeLabel = mode === 'reset' ? '초기화 후 반영' : '추가 반영';
+    const gradeListText = importedGrades.map(g => g + '학년').join(', ');
+    const skipNote = skippedGrades.size > 0
+      ? ` (인식할 수 없는 학년 값 [${[...skippedGrades].join(', ')}]은 건너뛰었습니다)`
+      : '';
+    const banner = document.getElementById('importBanner');
+    banner.innerHTML = `<b>${modeLabel}</b>: ${gradeListText} 총 ${matchedCount}명을 불러왔습니다. 특수학급 매칭 ${totalSpecial}명.${skipNote} 각 학년 탭을 눌러 확인해보세요.`;
+    banner.classList.add('show');
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function adjust(no, field, delta){
-  const c = classes.find(c => c.no === no);
+  const c = state[activeGrade].classes.find(c => c.no === no);
   if(!c) return;
   c[field] = Math.max(0, c[field] + delta);
   render();
 }
 
 function addClass(){
-  classes.push({ no: nextClassNo, regular: 0, special: 0 });
-  nextClassNo++;
+  const list = state[activeGrade].classes;
+  const nextNo = list.length ? Math.max(...list.map(c => c.no)) + 1 : 1;
+  list.push({ no: nextNo, regular: 0, special: 0 });
   render();
 }
 
 function removeClass(no){
-  classes = classes.filter(c => c.no !== no);
+  state[activeGrade].classes = state[activeGrade].classes.filter(c => c.no !== no);
   render();
 }
 
@@ -493,6 +1105,7 @@ document.getElementById('typeToggle').addEventListener('click', (e) => {
 });
 
 document.getElementById('assignBtn').addEventListener('click', () => {
+  const classes = state[activeGrade].classes;
   if(classes.length === 0) return;
 
   const sorted = [...classes].sort((a,b) => {
@@ -507,10 +1120,11 @@ document.getElementById('assignBtn').addEventListener('click', () => {
 
   const reason = tiedCount > 1
     ? `최소 인원 ${tiedCount}개 학급 동률 → 반 번호 최우선`
-    : `가중 합계 최소(${tiedTotal})`;
+    : `배정 기준 인원 최소(${tiedTotal})`;
 
-  log.push({
-    seq: log.length + 1,
+  state[activeGrade].log.push({
+    id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    seq: state[activeGrade].log.length + 1,
     type: currentType,
     assignedTo: target.no,
     reason: reason,
@@ -520,7 +1134,7 @@ document.getElementById('assignBtn').addEventListener('click', () => {
   render();
 
   const banner = document.getElementById('resultBanner');
-  banner.innerHTML = `<b>${target.no}반</b>에 ${currentType === 'special' ? '특수학급' : '일반'} 전학생이 배정되었습니다. (${reason})`;
+  banner.innerHTML = `<b>${activeGrade}학년 ${target.no}반</b>에 ${currentType === 'special' ? '특수학급' : '일반'} 전학생이 배정되었습니다. (${reason})`;
   banner.classList.add('show');
 
   const card = document.getElementById('card-' + target.no);
